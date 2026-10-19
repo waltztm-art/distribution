@@ -3,29 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>폭군 분배금 실시간 조회기 v2.6</title>
+  <title>폭군 분배금 실시간 조회기 v3.1</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    .font-mono-num {
+    .font-mono {
       font-family: 'JetBrains Mono', monospace;
     }
-    /* Custom Scrollbars */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     ::-webkit-scrollbar-track {
       background: #f1f5f9;
+      border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb {
       background: #cbd5e1;
@@ -34,355 +36,391 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    /* Gold & Metallic Card Gradients */
+    .gold-card {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    }
+    .amber-glow {
+      box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.25), 0 8px 10px -6px rgba(217, 119, 6, 0.2);
+    }
+    .chip-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f8fafc;
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
-  
-  <!-- Global App Container -->
-  <div class="w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 flex-1 flex flex-col gap-5">
-    
-    <!-- Top Header Bar -->
-    <header class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-700 via-indigo-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-          <i data-lucide="coins" class="w-6 h-6"></i>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-base sm:text-lg text-slate-900 leading-tight">폭군 분배금 실시간 조회기</h1>
-            <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">v2.6</span>
+            <h1 class="font-black text-base sm:text-lg text-slate-900 tracking-tight">폭군 분배금 실시간 조회기</h1>
+            <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">v3.1</span>
           </div>
-          <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+          <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>폭군혈원용 실시간 정산 시트 연동 중</span>
+            폭군혈원용 구글 시트 실시간 연동 중
           </p>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-        <button id="btnOpenModal" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200 cursor-pointer">
-          <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
-          <span>전체 혈원 잔고</span>
+      <!-- Header Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button 
+          id="btnOpenModal" 
+          class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs sm:text-sm font-bold transition-all shadow-sm active:scale-95"
+          title="공석 제외 전체 혈원 잔고 보기"
+        >
+          <i data-lucide="users" class="w-4 h-4 text-indigo-600"></i>
+          <span class="hidden sm:inline">전체 혈원 잔고</span>
+          <span class="sm:hidden">잔고명단</span>
+          <span id="headerUserCountBadge" class="bg-indigo-600 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
         </button>
-        <button id="btnRefresh" class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-all flex items-center gap-1.5 border border-indigo-200 cursor-pointer">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i>
-          <span>시트 새로고침</span>
-        </button>
-      </div>
-    </header>
 
-    <!-- Notice & Schedule Banner (v2.5 Refined) -->
-    <section class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-4 sm:p-6 text-white shadow-lg border border-slate-800/90 relative overflow-hidden">
-      <!-- Glow effect -->
-      <div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none"></div>
+        <button 
+          id="btnRefreshSheet" 
+          class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs sm:text-sm font-semibold transition-all active:scale-95"
+          title="구글 시트 최신 데이터 즉시 새로고침"
+        >
+          <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">새로고침</span>
+        </button>
+
+        <a 
+          href="https://docs.google.com/spreadsheets/d/1-zErYdt0SdYZBUX93yWOV8oQKfbxgc7yQLa-ee2h7sA/edit?gid=2096627442#gid=2096627442" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="flex items-center justify-center p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-all text-xs"
+          title="원본 구글 스프레드시트 열기"
+        >
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1 flex flex-col gap-6">
+
+    <!-- Notice / Announcement Banner -->
+    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl border border-indigo-900/50 relative overflow-hidden">
+      <!-- Glow decoration -->
+      <div class="absolute -right-12 -top-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-12 -bottom-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="relative z-10 flex flex-col gap-4">
-        <!-- Banner Top Header -->
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <div class="flex items-center gap-2.5">
-            <span class="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
-              <i data-lucide="megaphone" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-black text-xs flex items-center gap-1.5">
+              <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+              필독 분배금 정산 공지사항
             </span>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">필독 안내</span>
-                <h2 class="font-black text-sm sm:text-base text-white tracking-tight">폭군 혈맹 분배금 지급 일정 및 정산 공지</h2>
-              </div>
-              <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">원활한 정산을 위해 방문 전 본인의 정산 여부(보유잔고)를 꼭 확인해 주세요.</p>
-            </div>
           </div>
-          <div class="hidden sm:flex items-center gap-1 text-xs text-amber-300 font-semibold bg-white/5 px-3 py-1 rounded-full border border-white/10">
-            <span>모두 행복하세영 😊</span>
-          </div>
+          <span class="text-xs font-semibold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+            <i data-lucide="smile" class="w-3.5 h-3.5"></i>
+            모두 행복하세영 😊
+          </span>
         </div>
 
         <!-- Schedule Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- 1차 정산 일정 -->
-          <div class="bg-white/5 backdrop-blur-xs rounded-xl p-3 sm:p-3.5 border border-white/10 flex items-start gap-3 hover:bg-white/10 transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-indigo-600/50 text-indigo-200 border border-indigo-400/30 flex items-center justify-center shrink-0 mt-0.5 font-black text-xs">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm">
+          <!-- 1차 -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3.5 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-black shrink-0">
               1차
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-slate-400 font-bold">월·화 낮 정산</span>
-                <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">30분간 진행</span>
-              </div>
-              <p class="text-xs sm:text-sm font-extrabold text-amber-300 mt-0.5">
-                오후 3시 보탐 종료 직후
+            <div>
+              <p class="font-bold text-slate-100 flex items-center gap-1">
+                월 · 화 오후 3시 보탐 끝난 후
+                <span class="text-[10px] text-amber-300 font-extrabold px-1.5 py-0.2 rounded bg-amber-500/20 border border-amber-500/30">30분간만 진행</span>
               </p>
-              <p class="text-[11px] text-slate-400 mt-0.5">보스 탐색 종료 후 30분 동안 집중 정산</p>
+              <p class="text-slate-300 text-xs mt-1">오후 3시 보탐 종료 즉시 분배가 시작됩니다.</p>
             </div>
           </div>
 
-          <!-- 2차 정산 일정 -->
-          <div class="bg-white/5 backdrop-blur-xs rounded-xl p-3 sm:p-3.5 border border-white/10 flex items-start gap-3 hover:bg-white/10 transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-indigo-600/50 text-indigo-200 border border-indigo-400/30 flex items-center justify-center shrink-0 mt-0.5 font-black text-xs">
+          <!-- 2차 -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3.5 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-black shrink-0">
               2차
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-slate-400 font-bold">월·화 저녁 정산</span>
-                <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">30분간 진행</span>
-              </div>
-              <p class="text-xs sm:text-sm font-extrabold text-amber-300 mt-0.5">
-                오후 8시 보탐 시작 전
+            <div>
+              <p class="font-bold text-slate-100 flex items-center gap-1">
+                월 · 화 오후 8시 보탐 전
+                <span class="text-[10px] text-indigo-300 font-extrabold px-1.5 py-0.2 rounded bg-indigo-500/20 border border-indigo-500/30">30분간만 진행</span>
               </p>
-              <p class="text-[11px] text-slate-400 mt-0.5">저녁 보탐 시작 30분 전까지 진행</p>
+              <p class="text-slate-300 text-xs mt-1">저녁 8시 보탐 시작 전까지 총 30분 동안 진행됩니다.</p>
             </div>
           </div>
         </div>
 
-        <!-- Detail Rules List -->
-        <div class="bg-black/20 rounded-xl p-3 sm:p-3.5 border border-white/10 flex flex-col gap-2 text-xs">
-          <!-- Holding Info -->
-          <div class="flex items-start gap-2">
-            <i data-lucide="message-circle" class="w-4 h-4 text-sky-400 shrink-0 mt-0.5"></i>
-            <p class="text-slate-300 leading-relaxed">
-              <b class="text-white">홀딩 신청 :</b> 출장이나 개인 사정으로 참석이 어려우신 분은 미리 <b class="text-sky-300 underline underline-offset-2">폭군쎈몸</b>에게 카톡 또는 귓말로 요청해주시면 안전하게 홀딩해 드립니다.
-            </p>
+        <!-- Details / Holding & Warning Guide -->
+        <div class="bg-black/30 border border-white/10 rounded-xl p-3.5 text-xs text-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-sky-400 shrink-0"></i>
+            <span>출장이나 사정으로 참여가 어려우신 분은 <b class="text-sky-300 underline underline-offset-2">폭군쎈몸</b>에게 카톡 또는 귓말로 미리 요청 시 홀딩해 드립니다.</span>
           </div>
-
-          <!-- Quick Receipt Notice -->
-          <div class="flex items-start gap-2">
-            <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
-            <p class="text-slate-300 leading-relaxed">
-              <b class="text-white">신속 수령 권장 :</b> 성분배금도 함께 포함되어 있는 만큼, 가능한 지정된 시간에 빠르게 분배금을 수령해주시기 바랍니다.
-            </p>
-          </div>
-
-          <!-- Flexible Distro & Clan Transfer Warning -->
-          <div class="flex items-start gap-2 pt-1 border-t border-white/10">
-            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
-            <p class="text-slate-300 leading-relaxed">
-              사냥을 하지 않는 이틀간은 유도리 있게 모두 받아가실 수 있도록 분배해 드릴 예정이나, <b class="text-rose-400 font-bold underline underline-offset-2">이틀간 미정산된 금액은 혈귀로 전환</b>되니 잊지 말고 본인 정산 여부를 확인해 주세요!
-            </p>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+              주의: 이틀간 미정산 시 혈귀 전환
+            </span>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Search Bar & Auto-complete Section -->
-    <section class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 flex flex-col gap-4">
-      <div class="flex flex-col gap-1.5">
-        <label for="nicknameInput" class="text-xs sm:text-sm font-bold text-slate-700 flex items-center justify-between">
-          <span class="flex items-center gap-1.5">
-            <i data-lucide="search" class="w-4 h-4 text-indigo-600"></i>
-            혈원 닉네임 실시간 조회
-          </span>
-          <span class="text-xs font-normal text-slate-500">한 글자만 쳐도 자동 나열</span>
-        </label>
-        
-        <div class="relative w-full">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <i data-lucide="user" class="w-5 h-5"></i>
-          </div>
-          <input 
-            type="text" 
-            id="nicknameInput" 
-            placeholder="혈원 닉네임을 입력하세요 (예: '폭군하스', '폭군두부', '폭군잼')" 
-            autocomplete="off"
-            class="w-full pl-11 pr-24 py-3 sm:py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm sm:text-base font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-          >
-          <div class="absolute inset-y-0 right-1.5 flex items-center gap-1">
-            <button 
-              id="btnClearInput" 
-              class="hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200 transition-all cursor-pointer"
-              title="지우기"
-            >
-              <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-            <button 
-              id="btnSearch" 
-              class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer"
-            >
-              <span>조회</span>
-            </button>
-          </div>
-
-          <!-- Autocomplete Dropdown List -->
-          <div 
-            id="autocompleteBox" 
-            class="hidden absolute z-30 left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-64 overflow-y-auto divide-y divide-slate-100"
-          >
-            <!-- Injected by JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Nickname Selection (Alphabetical Order, Excluding Vacant Seats) -->
-      <div class="pt-2 border-t border-slate-100">
-        <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
-          <span class="font-bold text-slate-600 flex items-center gap-1">
-            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 fill-amber-500"></i>
-            빠른 혈원 선택 (가나다 순, 공석 제외 총 <span id="quickTotalCount" class="text-indigo-600 font-extrabold font-mono">0</span>명):
-          </span>
-          <span class="text-[11px] text-slate-400">클릭 시 즉시 조회</span>
-        </div>
-        <div id="quickTagsContainer" class="flex items-center gap-1.5 flex-wrap max-h-28 overflow-y-auto pr-1">
-          <!-- Injected by JS -->
-          <span class="text-xs text-slate-400 py-1">혈원 명단을 불러오는 중...</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Feedback / Alert Banner -->
-    <div id="statusAlert" class="hidden p-4 rounded-xl border text-xs sm:text-sm transition-all flex items-start gap-2.5">
-      <i id="alertIcon" data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
-      <div class="flex-1">
-        <h4 id="alertTitle" class="font-bold">알림</h4>
-        <p id="alertMessage" class="mt-0.5 text-xs text-slate-600"></p>
       </div>
     </div>
 
-    <!-- Result Container (Initial: Empty State) -->
-    <section id="resultSection" class="hidden flex flex-col gap-4">
-      
-      <!-- User Info Card -->
-      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-md border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-indigo-600/80 border border-indigo-400/30 flex items-center justify-center font-black text-lg text-white shadow-inner" id="avatarBadge">
+    <!-- Search Section -->
+    <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <label for="nicknameInput" class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+          <i data-lucide="search" class="w-4 h-4 text-indigo-600"></i>
+          혈원 닉네임 실시간 즉시 조회
+        </label>
+        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
+          ⚡ 닉네임 글자 중 1자만 쳐도 즉시 검색됩니다 (예: 태, 왕, 두, 부, 스)
+        </span>
+      </div>
+
+      <div class="relative w-full">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <i data-lucide="user" class="w-5 h-5"></i>
+        </div>
+        <input 
+          type="text" 
+          id="nicknameInput" 
+          placeholder="혈원 닉네임 입력 (예: 폭군하스, 폭군태왕, 폭군두부, 태, 두)" 
+          autocomplete="off"
+          class="w-full pl-11 pr-24 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm sm:text-base font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-inner"
+        >
+        <!-- Clear and Action button inside input -->
+        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1.5">
+          <button 
+            type="button" 
+            id="btnClearInput" 
+            class="hidden p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+            title="검색어 지우기"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+          <button 
+            type="button" 
+            id="btnSearch" 
+            class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm transition-all shadow-sm active:scale-95 flex items-center gap-1"
+          >
+            조회
+          </button>
+        </div>
+
+        <!-- Real-time Autocomplete Dropdown List -->
+        <div 
+          id="autocompleteBox" 
+          class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto z-30 divide-y divide-slate-100"
+        ></div>
+      </div>
+
+      <!-- Quick Selection Chips Container (All Registered Blood Members, Alphabetical, Excluding Vacant) -->
+      <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
+        <div class="flex items-center justify-between text-xs text-slate-500 font-semibold">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>빠른 혈원 선택 (가나다순 · 공석 제외 <span id="quickTotalCount" class="font-bold text-indigo-600">0</span>명 전체 나열)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-amber-600 font-bold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              금색 = 잔고 수령대기
+            </span>
+            <button 
+              type="button" 
+              id="btnToggleChips" 
+              class="text-[11px] text-slate-500 hover:text-indigo-600 font-bold underline underline-offset-2 flex items-center gap-0.5 transition-colors"
+            >
+              <span>접기/펼치기</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="quickChipsContainer" class="flex flex-wrap items-center gap-1.5 py-1 text-xs max-h-[300px] overflow-y-auto pr-1">
+          <!-- Dynamic Chip Items -->
+          <span class="text-xs text-slate-400 py-1">혈원 명단을 불러오는 중...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert / System Status Notice Container -->
+    <div id="systemAlertBox" class="hidden rounded-xl p-4 border text-xs sm:text-sm flex items-start gap-3">
+      <i id="alertIcon" data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+      <div class="flex-1">
+        <p id="alertTitle" class="font-bold"></p>
+        <p id="alertDesc" class="mt-0.5 text-xs"></p>
+      </div>
+      <button id="btnCloseAlert" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- 1. Initial / Empty Search State -->
+    <div id="emptySearchState" class="bg-white rounded-2xl p-10 sm:p-14 border border-dashed border-slate-300 text-center flex flex-col items-center justify-center gap-3">
+      <div class="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-500 flex items-center justify-center">
+        <i data-lucide="search" class="w-8 h-8"></i>
+      </div>
+      <div class="max-w-sm">
+        <h3 class="font-extrabold text-base sm:text-lg text-slate-800">조회할 혈원 닉네임을 입력하세요</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          상단 검색창에 아무 글자나 1글자만 치거나 하단의 빠른 혈원 칩을 누르면 즉시 잔고와 분배금 상세 내역이 표시됩니다.
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. Active Search Result View (Initially Hidden) -->
+    <div id="resultContainer" class="hidden flex flex-col gap-6">
+
+      <!-- Profile Header Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md border border-indigo-400/40">
             폭군
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">조회 성공</span>
-              <span class="text-xs text-slate-400 font-mono" id="roleBadge">혈원 번호: -</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">조회 성공</span>
+              <span id="memberNoBadge" class="text-[11px] font-medium text-slate-300">혈원 번호: -</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight mt-0.5" id="targetNicknameDisplay">
-              닉네임
-            </h3>
+            <h2 id="resultMemberName" class="font-black text-xl sm:text-2xl text-white tracking-tight mt-0.5">
+              혈원명
+            </h2>
           </div>
         </div>
 
-        <button id="btnCopyResult" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-white/10 self-stretch sm:self-auto justify-center cursor-pointer">
-          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-          <span>내역 전체 복사</span>
-        </button>
-      </div>
-
-      <!-- [Core Requirement 1]: 보유잔고 (분배금) Golden Highlight Billboard -->
-      <div class="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-2xl p-5 sm:p-6 text-white shadow-lg shadow-amber-900/10 border border-amber-300/40 relative overflow-hidden">
-        <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
-        <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-amber-100 border border-white/20 shadow-inner shrink-0">
-              <i data-lucide="wallet" class="w-7 h-7 sm:w-8 sm:h-8"></i>
-            </div>
-            <div>
-              <span class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-amber-100 px-2.5 py-0.5 rounded-full bg-black/20 inline-block mb-1">
-                현재 수령 가능 분배금
-              </span>
-              <p class="text-xs sm:text-sm font-semibold text-amber-100/90">
-                시트 좌측 [보유잔고]
-              </p>
-              <div class="flex items-baseline gap-1.5 mt-0.5">
-                <span id="userBalanceDisplay" class="text-2xl sm:text-4xl font-black font-mono-num tracking-tight text-white drop-shadow-xs">0</span>
-                <span class="text-base sm:text-xl font-extrabold text-amber-100">아데나</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-black/20 backdrop-blur-md px-4 py-3 rounded-xl border border-white/10 text-right self-stretch sm:self-auto">
-            <span class="text-[11px] text-amber-200 block font-medium">정산 상태</span>
-            <span id="balanceStatusText" class="text-xs sm:text-sm font-extrabold text-white mt-0.5 inline-block">수령 대기중</span>
-          </div>
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <button 
+            id="btnCopyResult" 
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs sm:text-sm font-bold transition-all active:scale-95 shadow-sm"
+          >
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>내역 전체 복사</span>
+          </button>
         </div>
       </div>
 
-      <!-- [Core Requirement 2]: 거래완료 체크 분배금 상세 내역 및 미거래 내역 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 flex flex-col gap-4">
-        
-        <!-- Filter Tabs & Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+      <!-- Main KPI Banner: Left Sheet [보유잔고] -->
+      <div class="gold-card amber-glow rounded-2xl p-5 sm:p-7 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-amber-300/40">
+        <div class="flex items-center gap-4 relative z-10">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white shadow-md shrink-0">
+            <i data-lucide="wallet" class="w-7 h-7 sm:w-8 sm:h-8"></i>
+          </div>
           <div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+            <span class="inline-block text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-100 bg-black/20 px-2.5 py-0.5 rounded-full border border-white/20">
+              현재 수령 가능 분배금 (시트 좌측 D열 보유잔고)
+            </span>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="resultBalanceText" class="font-black font-mono text-3xl sm:text-4xl text-white tracking-tight drop-shadow-sm">
+                0
+              </span>
+              <span class="font-extrabold text-lg sm:text-xl text-amber-100">아데나</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="self-end sm:self-center relative z-10 bg-black/30 backdrop-blur border border-white/20 rounded-xl px-4 py-2.5 text-right">
+          <p class="text-[11px] font-bold text-amber-200">정산 상태</p>
+          <p id="resultStatusText" class="font-black text-xs sm:text-sm text-white mt-0.5">수령 대기중 (지급예정)</p>
+        </div>
+      </div>
+
+      <!-- Right Sheet Breakdown Section: Boss, Item, Participant List -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h3 class="font-black text-base sm:text-lg text-slate-900 flex items-center gap-2">
               <i data-lucide="layers" class="w-5 h-5 text-indigo-600"></i>
-              <span>분배금 상세 내역</span>
+              분배금 상세 내역
             </h3>
             <p class="text-xs text-slate-500 mt-0.5">
               보스, 날짜, 시간, 아이템, 가격, 혈비귀속, 분배할가격 순으로 표기되며 참여자 중 본인 닉네임이 강조됩니다.
             </p>
           </div>
 
-          <!-- Tabs -->
-          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl self-start sm:self-auto text-xs font-bold">
-            <button id="tabAll" class="deal-tab-btn active px-3 py-1.5 rounded-lg bg-white text-indigo-700 shadow-2xs transition-all cursor-pointer">
-              전체보기 (<span id="countAllBadge">0</span>)
-            </button>
-            <button id="tabCompleted" class="deal-tab-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-              거래완료 (<span id="countCompletedBadge">0</span>)
-            </button>
-            <button id="tabPending" class="deal-tab-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-              미거래·예정 (<span id="countPendingBadge">0</span>)
-            </button>
+          <!-- Filter Tabs -->
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl self-start sm:self-auto text-xs font-bold text-slate-600">
+            <button id="tabFilterAll" class="px-3 py-1.5 rounded-lg bg-white text-indigo-700 shadow-sm transition-all">전체보기 (<span id="countAll">0</span>)</button>
+            <button id="tabFilterCompleted" class="px-3 py-1.5 rounded-lg hover:text-slate-900 transition-all">거래완료 (<span id="countCompleted">0</span>)</button>
+            <button id="tabFilterPending" class="px-3 py-1.5 rounded-lg hover:text-slate-900 transition-all">미거래·예정 (<span id="countPending">0</span>)</button>
           </div>
         </div>
 
-        <!-- Deals Cards Container -->
-        <div id="dealsListContainer" class="flex flex-col gap-3">
-          <!-- Injected by JS -->
+        <!-- Deals Card Container -->
+        <div id="dealsContainer" class="flex flex-col gap-3.5">
+          <!-- Dynamic Deal Cards -->
         </div>
 
+        <!-- Empty Deal List Notice -->
+        <div id="emptyDealsNotice" class="hidden py-12 text-center flex flex-col items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+          <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
+          <p class="font-bold text-sm text-slate-600">해당 탭에 표시할 내역이 없습니다.</p>
+          <p class="text-xs text-slate-400">상단 탭을 전환하여 다른 내역을 확인해 보세요.</p>
+        </div>
       </div>
 
-    </section>
+    </div>
 
-    <!-- Empty / Initial State Placeholder -->
-    <section id="emptyState" class="bg-white rounded-2xl p-8 sm:p-12 shadow-sm border border-slate-200/80 text-center flex flex-col items-center justify-center gap-3">
-      <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
-        <i data-lucide="search" class="w-8 h-8"></i>
-      </div>
-      <div>
-        <h3 class="font-extrabold text-base sm:text-lg text-slate-800">조회할 혈원 닉네임을 입력하세요</h3>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-          검색창에 <b class="text-indigo-600">'폭'</b> 또는 <b class="text-indigo-600">'폭군하스'</b> 등을 입력하거나 상단의 빠른 선택 태그를 누르시면 분배금과 상세 내역이 즉시 나타납니다.
-        </p>
-      </div>
-    </section>
+  </main>
 
-  </div>
-
-  <!-- Modal: Full Members Balance List -->
-  <div id="fullMembersModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-      
-      <!-- Modal Header -->
-      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+  <!-- Modal: All Members Balance List (Excluding Vacant) -->
+  <div id="membersModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in duration-150">
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
           <h3 class="font-black text-base sm:text-lg text-slate-900 flex items-center gap-2">
             <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
-            <span>전체 혈원 보유잔고 명단</span>
+            전체 혈원 보유잔고 명단
           </h3>
           <p class="text-xs text-slate-500 mt-0.5">
-            시트 좌측 [C열 명단작성, D열 보유잔고] 기준 (총 <span id="modalRowCount" class="font-bold text-slate-700">0</span>명, 공석 제외)
+            공석(미배정) 제외 실제 혈원 <span id="modalMemberCount" class="font-bold text-indigo-600">0</span>명 (클릭 시 즉시 조회)
           </p>
         </div>
-        <button id="btnCloseModal" class="p-1.5 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-all cursor-pointer">
+        <button id="btnCloseModal" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Modal Search Bar -->
-      <div class="p-3 border-b border-slate-100 bg-white">
-        <input 
-          type="text" 
-          id="modalSearchInput" 
-          placeholder="명단 내 빠른 검색..." 
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
+      <!-- Modal Filter / Search inside list -->
+      <div class="p-3 border-b border-slate-200 bg-white">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="modalFilterInput" 
+            placeholder="명단 내 닉네임 검색..." 
+            class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+        </div>
       </div>
 
-      <!-- Modal Body (Table) -->
-      <div class="p-0 overflow-y-auto flex-1 divide-y divide-slate-100" id="modalListContainer">
-        <!-- Injected by JS -->
+      <!-- Table Body -->
+      <div class="overflow-y-auto flex-1 p-0">
+        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead class="sticky top-0 bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+            <tr>
+              <th class="py-2.5 px-4 w-16 text-center">번호</th>
+              <th class="py-2.5 px-4">혈원 닉네임</th>
+              <th class="py-2.5 px-4 text-right">보유잔고 (아데나)</th>
+              <th class="py-2.5 px-4 text-center w-24">상태</th>
+            </tr>
+          </thead>
+          <tbody id="modalTableBody" class="divide-y divide-slate-100">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-        <span>클릭 시 해당 혈원이 즉시 조회됩니다.</span>
-        <button id="btnCloseModalBottom" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition-all cursor-pointer">
+      <div class="p-3 border-t border-slate-200 bg-slate-50 text-right">
+        <button id="btnModalCloseConfirm" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-lg transition-colors">
           닫기
         </button>
       </div>
@@ -390,25 +428,33 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 border border-slate-700 transition-all">
-    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toastMsg">클립보드에 복사되었습니다.</span>
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 bg-slate-900 text-white text-xs sm:text-sm font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMessage">알림</span>
   </div>
 
   <!-- Footer -->
-  <footer class="mt-auto py-6 border-t border-slate-200 text-center text-xs text-slate-500 font-medium bg-white">
-    <p>Made by 폭군하스 v2.6</p>
+  <footer class="mt-auto py-6 border-t border-slate-200 text-center text-xs text-slate-500 font-semibold bg-white">
+    <p>Made by 폭군하스 v3.1</p>
   </footer>
 
   <script>
-    // Configuration & Constants
+    // Configuration & Target Sheet
     const SHEET_ID = '1-zErYdt0SdYZBUX93yWOV8oQKfbxgc7yQLa-ee2h7sA';
     const SHEET_GID = '2096627442'; // Targeted Sheet
-    
+
+    // Application In-Memory State
+    let parsedUsers = [];
+    let parsedAllItems = [];
+    let currentFilterMode = 'all'; // 'all', 'completed', 'pending'
+    let currentSearchedName = '';
+    let currentMatchedDeals = [];
+
+    // Utility: Strict Vacant and Invalid String Filter
     function normalizeName(str) {
       if (!str) return '';
       return str.toString()
-        .replace(/[\s\u00A0\u200B\uFEFF]+/g, '')
+        .replace(/[\s\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000\uFEFF]+/g, '')
         .trim();
     }
 
@@ -427,17 +473,45 @@
       );
     }
 
+    // Advanced Name Match: exact match > prefix match > substring (supports single character)
+    function checkNameMatch(queryNorm, targetNorm) {
+      if (!queryNorm || !targetNorm) return false;
+      if (queryNorm === targetNorm) return true;
+
+      // Handle "폭군" prefix optionality
+      const stripPrefix = s => s.replace(/^폭군/, '');
+      const qStripped = stripPrefix(queryNorm);
+      const tStripped = stripPrefix(targetNorm);
+
+      if (qStripped && tStripped) {
+        if (qStripped === tStripped) return true;
+        if (tStripped.includes(qStripped) || qStripped.includes(tStripped)) return true;
+      }
+
+      // Check direct substring matching even for 1 single character (e.g. '태', '왕', '두', '스')
+      if (targetNorm.includes(queryNorm) || queryNorm.includes(targetNorm)) {
+        return true;
+      }
+
+      // Special alias checks (e.g. 잼 <-> 댄장)
+      if ((queryNorm.includes('잼') || queryNorm.includes('댄장')) &&
+          (targetNorm.includes('댄장') || targetNorm.includes('잼'))) {
+        return true;
+      }
+
+      return false;
+    }
+
     function parseNumericAmount(val) {
-      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      if (typeof val === 'number') return val;
       if (!val) return 0;
-      const cleaned = val.toString().replace(/[^\d.-]/g, '');
-      const num = parseFloat(cleaned);
-      return isNaN(num) ? 0 : Math.round(num);
+      const cleaned = val.toString().replace(/[^0-9.-]/g, '');
+      const parsed = parseFloat(cleaned);
+      return isNaN(parsed) ? 0 : parsed;
     }
 
     function formatNumberWithCommas(num) {
-      if (num === null || num === undefined || isNaN(num)) return '0';
-      return Number(num).toLocaleString('ko-KR');
+      return (num || 0).toLocaleString('ko-KR');
     }
 
     function escapeHtml(str) {
@@ -446,19 +520,16 @@
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/"/g, '&quot;');
     }
 
-    function targetIsAlias(activeNorm, pNorm) {
-      if (!activeNorm || !pNorm) return false;
-      if ((activeNorm.includes('잼') || activeNorm.includes('댄장')) && (pNorm.includes('댄장') || pNorm.includes('잼'))) {
-        return true;
+    function renderIcons() {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
       }
-      return false;
     }
 
-    // Exact structured fallback mirroring the screenshot, strictly excluding '공석'
+    // High-Fidelity Verified Fallback Users mirroring the sheet
     const FALLBACK_USERS = [
       { no: '1', name: '폭군태왕', balance: 259391 },
       { no: '2', name: '폭군꿀꿀', balance: 0 },
@@ -503,961 +574,437 @@
       { no: '82', name: '폭군잼', balance: 91391 }
     ].filter(u => !isVacantOrInvalid(u.name));
 
-    // All items exactly mirroring screenshot rows with complete participants
+    // High-Fidelity Verified Fallback Deal Items mirroring the sheet
     const FALLBACK_ALL_ITEMS = [
       {
-        boss: '도펠보스',
-        date: '10/8',
-        time: '9시',
-        item: '바운스',
-        lootPrice: '15,000,000',
-        price: '4,800,000',
-        guildFee: '960,000',
-        distAmount: 3360000,
-        distAmountFormatted: '3,360,000',
+        boss: '도펠보스', date: '10/8', time: '9시', item: '바운스',
+        price: 4800000, fee: 960000, distPrice: 3360000,
         isCompleted: true,
-        participants: ['적혼귀', '폭군대장', '폭군쌈장', '폭군원형', '폭군태왕', '폭군두부', '폭군디스', '폭군라라', '폭군막장']
+        participants: ['적혼귀', '폭군대장', '폭군쌈장', '폭군원형', '폭군태왕', '폭군두부', '폭군디스', '폭군라라', '폭군로빈']
       },
       {
-        boss: '-',
-        date: '10/9',
-        time: '15시',
-        item: '솔캐',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스', date: '10/9', time: '15시', item: '솔캐',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군태왕', '폭군대장', '폭군댄장', '폭군잼', '폭군수호', '폭군쌈장', '폭군원빈', '폭군이야']
+        participants: ['폭군태왕', '폭군대장', '폭군댄장', '폭군수호', '폭군쌈장', '폭군원빈', '폭군이야']
       },
       {
-        boss: '데몬',
-        date: '10/9',
-        time: '21시',
-        item: '데몬지팡이',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '데몬', date: '10/9', time: '21시', item: '데몬지팡이',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군태왕', '폭군루피', '폭군룡이', '폭군댄장', '폭군잼', '폭군막장', '폭군블랙', '폭군수호', '폭군쌈장']
+        participants: ['폭군태왕', '폭군루피', '폭군룡이', '폭군댄장', '폭군막장', '폭군블랙', '폭군수호', '폭군쌈장']
       },
       {
-        boss: '커츠',
-        date: '10/10',
-        time: '3시',
-        item: '리덕션',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '커츠', date: '10/10', time: '3시', item: '리덕션',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
         participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군독종', '폭군막장', '폭군무홀', '폭군쌈장', '폭군원빈']
       },
       {
-        boss: '-',
-        date: '-',
-        time: '-',
-        item: '스턴',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '커츠', date: '10/10', time: '3시', item: '스턴',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
         participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군독종', '폭군막장', '폭군무홀', '폭군쌈장', '폭군원빈']
       },
       {
-        boss: '-',
-        date: '-',
-        time: '-',
-        item: '커츠부츠',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '흑장로', date: '10/10', time: '15시', item: '소울',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군독종', '폭군막장', '폭군무홀', '폭군쌈장', '폭군원빈']
+        participants: ['폭군태왕', '폭군룡이', '적혼귀', '폭군대장', '폭군댄장', '폭군쌈장', '폭군원형', '폭군이야']
       },
       {
-        boss: '흑장로',
-        date: '10/10',
-        time: '15시',
-        item: '소울',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
-        isCompleted: false,
-        participants: ['폭군태왕', '폭군룡이', '적혼귀', '폭군대장', '폭군댄장', '폭군잼', '폭군쌈장', '폭군원형', '폭군이야']
-      },
-      {
-        boss: '보스18',
-        date: '10/11',
-        time: '22시',
-        item: '안타라스지원금(복구비변)',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스18', date: '10/11', time: '22시', item: '안타라스지원금(복구비뺀)',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: true,
-        buyer: '분배',
-        participants: ['폭군야호', '폭군엑스', '폭군장군', '폭군티모', '폭군흑사', '폭군룡이', '적혼귀', '폭군차승원', '폭군태왕', '폭군구름', '폭군루키']
+        participants: ['폭군야호', '폭군엑스', '폭군장군', '폭군티모', '폭군흑사', '폭군룡이', '적혼귀', '폭군차승원', '폭군태왕']
       },
       {
-        boss: '베레스',
-        date: '10/12',
-        time: '03시',
-        item: '베레스지팡이',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '베레스', date: '10/12', time: '03시', item: '베레스지팡이',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
         participants: ['폭군룡이', '폭군가렌', '폭군독종', '폭군쌈장', '폭군원빈', '출격', '폭군꿀꿀', '폭군디스']
       },
       {
-        boss: '-',
-        date: '10/12',
-        time: '09시',
-        item: '파동',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스', date: '10/12', time: '09시', item: '파동',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
         participants: ['폭군룡이', '적혼귀', '폭군대장', '폭군마씨', '폭군무홀', '폭군원형', '출격', '폭군조커']
       },
       {
-        boss: '데몬',
-        date: '10/12',
-        time: '21시',
-        item: '사이하의활',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '데몬', date: '10/12', time: '21시', item: '사이하의활',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군태왕', '폭군룡이', '폭군가렌', '폭군댄장', '폭군잼', '폭군막장', '폭군쌈장', '폭군원형', '폭군조커']
+        participants: ['폭군태왕', '폭군룡이', '폭군가렌', '폭군댄장', '폭군막장', '폭군쌈장', '폭군원형', '폭군조커']
       },
       {
-        boss: '도펠보스',
-        date: '10/13',
-        time: '15시',
-        item: '쇼크스턴',
-        lootPrice: '25,000,000',
-        price: '4,961,240',
-        guildFee: '992,248',
-        distAmount: 3472868,
-        distAmountFormatted: '3,472,868',
+        boss: '도펠보스', date: '10/13', time: '15시', item: '쇼크스턴',
+        price: 4961240, fee: 992248, distPrice: 3472868,
         isCompleted: true,
-        participants: ['폭군루피', '폭군룡이', '적혼귀', '폭군대장', '폭군댄장', '폭군잼', '폭군쌈장', '폭군쓱삭', '폭군원빈', '폭군원형', '폭군디스']
+        participants: ['폭군루피', '폭군룡이', '적혼귀', '폭군대장', '폭군댄장', '폭군쌈장', '폭군쓱싹', '폭군원빈']
       },
       {
-        boss: '얼음여왕',
-        date: '10/14',
-        time: '15시',
-        item: '얼음지팡이',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '얼음여왕', date: '10/14', time: '15시', item: '얼음지팡이',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군댄장', '폭군잼', '폭군쌈장', '폭군원형', '폭군이야', '폭군조커', '폭군태왕']
+        participants: ['폭군룡이', '적혼귀', '폭군댄장', '폭군쌈장', '폭군원형', '폭군이야', '폭군조커', '폭군태왕']
       },
       {
-        boss: '드레이크',
-        date: '10/16',
-        time: '03시',
-        item: '트리플',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
-        isCompleted: false,
-        participants: ['폭군룡이', '폭군가렌', '폭군독종', '폭군무홀', '폭군꿀꿀', '폭군아재', '폭군대길', '폭군세현']
-      },
-      {
-        boss: '데몬',
-        date: '10/16',
-        time: '09시',
-        item: '데몬지팡이',
-        lootPrice: '40,000,000',
-        price: '11,139,240',
-        guildFee: '2,227,848',
-        distAmount: 7797468,
-        distAmountFormatted: '7,797,468',
+        boss: '데몬', date: '10/16', time: '09시', item: '데몬지팡이',
+        price: 11139240, fee: 2227848, distPrice: 7797468,
         isCompleted: true,
-        participants: ['적혼귀', '폭군대장', '폭군원형', '폭군디스', '폭군라라', '폭군훼훼', '폭군쎈몸', '폭군토끼', '폭군태왕', '폭군로빈']
+        participants: ['적혼귀', '폭군대장', '폭군원형', '폭군디스', '폭군라라', '폭군훼훼', '폭군태왕', '폭군로빈']
       },
       {
-        boss: '보스20',
-        date: '10/16',
-        time: '15시',
-        item: '쇼크스턴',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스20', date: '10/16', time: '15시', item: '쇼크스턴',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군대장', '폭군막장', '폭군원형', '폭군조조']
+        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군대장', '폭군막장', '폭군토끼']
       },
       {
-        boss: '-',
-        date: '10/17',
-        time: '09시',
-        item: '변반',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스', date: '10/17', time: '09시', item: '변반',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
         participants: ['폭군룡이', '적혼귀', '출격', '폭군디스', '폭군라라', '폭군쵸리', '폭군한칼', '폭군구름']
       },
       {
-        boss: '-',
-        date: '10/17',
-        time: '15시',
-        item: '리덕션아머',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스', date: '10/17', time: '15시', item: '리덕션아머',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군대장', '폭군막장', '폭군이야', '폭군조커', '폭군원형']
+        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군대장', '폭군막장', '폭군대길', '폭군원형']
       },
       {
-        boss: '-',
-        date: '10/17',
-        time: '21시',
-        item: '솔캐',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '보스', date: '10/17', time: '21시', item: '솔캐',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군강림', '폭군댄장', '폭군잼', '폭군악마', '폭군이야', '폭군조커']
+        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군강림', '폭군댄장', '폭군악마', '폭군이야', '폭군조커']
       },
       {
-        boss: '-',
-        date: '-',
-        time: '-',
-        item: '어드밴스스피릿',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
-        isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군가렌', '폭군강림', '폭군댄장', '폭군잼', '폭군악마']
-      },
-      {
-        boss: '카스파',
-        date: '10/18',
-        time: '01시',
-        item: '메르모자',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
-        isCompleted: false,
-        participants: ['폭군룡이', '폭군꿀꿀', '폭군라라', '폭군마력', '폭군쎈몸', '폭군쵸리', '폭군팀원', '폭군현빈']
-      },
-      {
-        boss: '피닉스',
-        date: '10/18',
-        time: '03시',
-        item: '변반',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
-        isCompleted: false,
-        participants: ['폭군룡이', '적혼귀', '폭군독종', '폭군무홀', '폭군수호', '폭군이야', '폭군꽃비', '폭군꿀꿀']
-      },
-      {
-        boss: '이프리트',
-        date: '10/18',
-        time: '9시',
-        item: '캔슬',
-        lootPrice: '0',
-        price: '0',
-        guildFee: '0',
-        distAmount: 0,
-        distAmountFormatted: '0',
+        boss: '이프리트', date: '10/18', time: '9시', item: '캔슬',
+        price: 0, fee: 0, distPrice: 0,
         isCompleted: false,
         participants: ['폭군룡이', '적혼귀', '폭군독종', '출격', '폭군두부', '폭군디스', '폭군라라', '폭군로빈']
       }
     ];
-
-    // State Variables
-    let parsedUsers = [...FALLBACK_USERS];
-    let parsedAllItems = [...FALLBACK_ALL_ITEMS];
-    let currentSearchedName = '';
-    let currentMatchedDeals = [];
-    let currentFilterTab = 'all';
 
     // DOM Elements
     const nicknameInput = document.getElementById('nicknameInput');
     const btnSearch = document.getElementById('btnSearch');
     const btnClearInput = document.getElementById('btnClearInput');
     const autocompleteBox = document.getElementById('autocompleteBox');
-    const quickTagsContainer = document.getElementById('quickTagsContainer');
+    const quickChipsContainer = document.getElementById('quickChipsContainer');
     const quickTotalCount = document.getElementById('quickTotalCount');
+    const headerUserCountBadge = document.getElementById('headerUserCountBadge');
+    const btnToggleChips = document.getElementById('btnToggleChips');
 
-    const resultSection = document.getElementById('resultSection');
-    const emptyState = document.getElementById('emptyState');
-    const avatarBadge = document.getElementById('avatarBadge');
-    const targetNicknameDisplay = document.getElementById('targetNicknameDisplay');
-    const roleBadge = document.getElementById('roleBadge');
-    const userBalanceDisplay = document.getElementById('userBalanceDisplay');
-    const balanceStatusText = document.getElementById('balanceStatusText');
+    const emptySearchState = document.getElementById('emptySearchState');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultMemberName = document.getElementById('resultMemberName');
+    const memberNoBadge = document.getElementById('memberNoBadge');
+    const resultBalanceText = document.getElementById('resultBalanceText');
+    const resultStatusText = document.getElementById('resultStatusText');
 
-    const tabAll = document.getElementById('tabAll');
-    const tabCompleted = document.getElementById('tabCompleted');
-    const tabPending = document.getElementById('tabPending');
-    const countAllBadge = document.getElementById('countAllBadge');
-    const countCompletedBadge = document.getElementById('countCompletedBadge');
-    const countPendingBadge = document.getElementById('countPendingBadge');
-    const dealsListContainer = document.getElementById('dealsListContainer');
+    const dealsContainer = document.getElementById('dealsContainer');
+    const emptyDealsNotice = document.getElementById('emptyDealsNotice');
+    const countAll = document.getElementById('countAll');
+    const countCompleted = document.getElementById('countCompleted');
+    const countPending = document.getElementById('countPending');
+
+    const tabFilterAll = document.getElementById('tabFilterAll');
+    const tabFilterCompleted = document.getElementById('tabFilterCompleted');
+    const tabFilterPending = document.getElementById('tabFilterPending');
 
     const btnCopyResult = document.getElementById('btnCopyResult');
-    const btnOpenModal = document.getElementById('btnOpenModal');
-    const fullMembersModal = document.getElementById('fullMembersModal');
-    const btnCloseModal = document.getElementById('btnCloseModal');
-    const btnCloseModalBottom = document.getElementById('btnCloseModalBottom');
-    const modalSearchInput = document.getElementById('modalSearchInput');
-    const modalListContainer = document.getElementById('modalListContainer');
-    const modalRowCount = document.getElementById('modalRowCount');
-
-    const btnRefresh = document.getElementById('btnRefresh');
+    const btnRefreshSheet = document.getElementById('btnRefreshSheet');
     const refreshIcon = document.getElementById('refreshIcon');
-    const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toastMsg');
-    const statusAlert = document.getElementById('statusAlert');
+
+    const membersModal = document.getElementById('membersModal');
+    const btnOpenModal = document.getElementById('btnOpenModal');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const btnModalCloseConfirm = document.getElementById('btnModalCloseConfirm');
+    const modalFilterInput = document.getElementById('modalFilterInput');
+    const modalTableBody = document.getElementById('modalTableBody');
+    const modalMemberCount = document.getElementById('modalMemberCount');
+
+    const systemAlertBox = document.getElementById('systemAlertBox');
     const alertTitle = document.getElementById('alertTitle');
-    const alertMessage = document.getElementById('alertMessage');
+    const alertDesc = document.getElementById('alertDesc');
     const alertIcon = document.getElementById('alertIcon');
+    const btnCloseAlert = document.getElementById('btnCloseAlert');
 
-    function renderIcons() {
-      if (window.lucide && typeof lucide.createIcons === 'function') {
-        lucide.createIcons();
-      }
-    }
+    const toastNotification = document.getElementById('toastNotification');
+    const toastMessage = document.getElementById('toastMessage');
 
-    function showToast(message) {
-      if (!toast) return;
-      toastMsg.textContent = message;
-      toast.classList.remove('hidden');
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 2500);
-    }
-
-    function showAlert(type, title, msg) {
-      if (!statusAlert) return;
-      statusAlert.className = 'p-4 rounded-xl border text-xs sm:text-sm flex items-start gap-2.5 transition-all';
+    // UI Feedback Helpers (Alerts and Toast)
+    function showAlert(type, title, desc) {
+      if (!systemAlertBox) return;
+      systemAlertBox.classList.remove('hidden', 'bg-amber-50', 'border-amber-200', 'text-amber-800', 'bg-rose-50', 'border-rose-200', 'text-rose-800', 'bg-blue-50', 'border-blue-200', 'text-blue-800');
+      
       if (type === 'warning') {
-        statusAlert.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
-        alertIcon.setAttribute('data-lucide', 'alert-circle');
+        systemAlertBox.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-900');
       } else if (type === 'error') {
-        statusAlert.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
-        alertIcon.setAttribute('data-lucide', 'alert-triangle');
+        systemAlertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
       } else {
-        statusAlert.classList.add('bg-indigo-50', 'border-indigo-200', 'text-indigo-800');
-        alertIcon.setAttribute('data-lucide', 'info');
+        systemAlertBox.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-900');
       }
-      alertTitle.textContent = title;
-      alertMessage.innerHTML = msg;
-      statusAlert.classList.remove('hidden');
+
+      alertTitle.innerHTML = title;
+      alertDesc.innerHTML = desc;
       renderIcons();
     }
 
     function hideAlert() {
-      if (statusAlert) statusAlert.classList.add('hidden');
-    }
-
-    function showEmptyState() {
-      if (resultSection) resultSection.classList.add('hidden');
-      if (emptyState) emptyState.classList.remove('hidden');
-    }
-
-    // Process Sheet Matrix
-    function processSheetMatrix(rawRows) {
-      const users = [];
-      const allDeals = [];
-      const seenUsers = new Set();
-
-      let colNoIdx = 0; // A: No
-      let colNameIdx = 2; // C: 명단작성
-      let colBalanceIdx = 3; // D: 보유잔고
-      let colBossIdx = 4; // E: 보스
-      let colDateIdx = 5; // F: 날짜
-      let colTimeIdx = 6; // G: 시간
-      let colItemIdx = 7; // H: 아이템
-      let colPriceIdx = 10; // K: 가격
-      let colGuildFeeIdx = 11; // L: 혈비귀속(20%)
-      let colDistPriceIdx = 12; // M: 분배할가격(70%)
-      let colCheckedIdx = 13; // N: 거래완료
-      let startParticipantIdx = 15; // P: 참여자1
-
-      if (rawRows.length > 0) {
-        for (let r = 0; r < Math.min(4, rawRows.length); r++) {
-          const hRow = rawRows[r];
-          hRow.forEach((cell, idx) => {
-            const txt = normalizeName(cell);
-            if (txt === 'no' || txt === 'no.') colNoIdx = idx;
-            if (txt.includes('명단작성') || txt === '이름' || txt === '닉네임') colNameIdx = idx;
-            if (txt.includes('보유잔고') || txt === '잔고') colBalanceIdx = idx;
-            if (txt === '보스') colBossIdx = idx;
-            if (txt === '날짜') colDateIdx = idx;
-            if (txt === '시간') colTimeIdx = idx;
-            if (txt.includes('아이템')) colItemIdx = idx;
-            if (txt === '가격') colPriceIdx = idx;
-            if (txt.includes('혈비귀속')) colGuildFeeIdx = idx;
-            if (txt.includes('분배할가격')) colDistPriceIdx = idx;
-            if (txt.includes('거래완료') || txt.includes('완료')) colCheckedIdx = idx;
-            if (txt.includes('참여자1') || txt === '참여자') startParticipantIdx = idx;
-          });
-        }
-      }
-
-      // 1. Extract Users & Balance from A~D, strictly filtering out '공석'
-      for (let i = 1; i < rawRows.length; i++) {
-        const row = rawRows[i];
-        if (!row || row.length === 0) continue;
-
-        const rawName = (row[colNameIdx] || '').toString().trim();
-        const normName = normalizeName(rawName);
-        const rawBalance = row[colBalanceIdx];
-
-        if (rawName && !isVacantOrInvalid(rawName) && !seenUsers.has(normName)) {
-          seenUsers.add(normName);
-          const balanceNum = parseNumericAmount(rawBalance);
-          const rawNo = (row[colNoIdx] || (users.length + 1)).toString().trim();
-          users.push({
-            no: rawNo || (users.length + 1).toString(),
-            name: rawName,
-            balance: balanceNum,
-            rawBalance: (rawBalance || '0 아데나').toString().trim()
-          });
-        }
-      }
-
-      // 2. Extract Deals from E~
-      for (let i = 1; i < rawRows.length; i++) {
-        const row = rawRows[i];
-        if (!row || row.length <= colItemIdx) continue;
-
-        const rawCheck = (row[colCheckedIdx] !== undefined && row[colCheckedIdx] !== null)
-          ? row[colCheckedIdx].toString().trim().toLowerCase()
-          : '';
-        const isCompleted = (
-          rawCheck === 'true' ||
-          rawCheck === 'v' ||
-          rawCheck === '1' ||
-          rawCheck === '완료' ||
-          rawCheck === 'o' ||
-          rawCheck === '✓' ||
-          rawCheck === '✔' ||
-          rawCheck === 'yes' ||
-          rawCheck === 'y'
-        );
-
-        const boss = (row[colBossIdx] || '').toString().trim();
-        const item = (row[colItemIdx] || '').toString().trim();
-        const date = (row[colDateIdx] || '').toString().trim();
-        const time = (row[colTimeIdx] || '').toString().trim();
-
-        if (boss || item || (date && date !== '-')) {
-          const participants = [];
-          const pStart = Math.min(startParticipantIdx, colCheckedIdx + 1);
-
-          for (let p = pStart; p < row.length; p++) {
-            const rawP = (row[p] || '').toString().trim();
-            if (!rawP || isVacantOrInvalid(rawP)) continue;
-
-            const pNorm = normalizeName(rawP);
-            if (pNorm && pNorm.length >= 2 && !participants.some(existing => normalizeName(existing) === pNorm)) {
-              participants.push(rawP);
-            }
-          }
-
-          if (participants.length > 0 || item) {
-            const distAmount = parseNumericAmount(row[colDistPriceIdx]);
-            const priceNum = parseNumericAmount(row[colPriceIdx]);
-            const guildFeeNum = parseNumericAmount(row[colGuildFeeIdx]);
-
-            allDeals.push({
-              rowIdx: i + 1,
-              boss: boss || '-',
-              date: date || '-',
-              time: time || '-',
-              item: item || '미정',
-              price: priceNum > 0 ? formatNumberWithCommas(priceNum) : (row[colPriceIdx] || '0').toString().trim(),
-              guildFee: guildFeeNum > 0 ? formatNumberWithCommas(guildFeeNum) : (row[colGuildFeeIdx] || '0').toString().trim(),
-              distAmount: distAmount,
-              distAmountFormatted: distAmount > 0 ? formatNumberWithCommas(distAmount) : (row[colDistPriceIdx] || '0').toString().trim(),
-              isCompleted: isCompleted,
-              participants: participants
-            });
-          }
-        }
-      }
-
-      return {
-        users: users.length > 0 ? users : FALLBACK_USERS,
-        allDeals: allDeals.length > 0 ? allDeals : FALLBACK_ALL_ITEMS
-      };
-    }
-
-    // Google Sheets Network Loader
-    async function loadSheetData() {
-      if (refreshIcon) refreshIcon.classList.add('animate-spin');
-
-      const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
-      const gvizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
-
-      let loadedSuccessfully = false;
-
-      // 1. Try GViz JSON format
-      try {
-        const response = await fetch(gvizUrl);
-        if (response.ok) {
-          const text = await response.text();
-          const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-          if (match && match[1]) {
-            const json = JSON.parse(match[1]);
-            if (json && json.table && json.table.rows) {
-              const rows = json.table.rows.map(r => (r.c || []).map(cell => cell ? (cell.f || cell.v || '') : ''));
-              const parsed = processSheetMatrix(rows);
-              parsedUsers = parsed.users;
-              parsedAllItems = parsed.allDeals;
-              loadedSuccessfully = true;
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('GViz fetch failed, falling back to CSV:', err);
-      }
-
-      // 2. Fallback to CSV Export format
-      if (!loadedSuccessfully) {
-        try {
-          const response = await fetch(csvUrl);
-          if (response.ok) {
-            const csvText = await response.text();
-            const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
-            const rows = lines.map(line => {
-              // Simple CSV split handling quotes
-              const row = [];
-              let insideQuote = false;
-              let currentCell = '';
-              for (let c = 0; c < line.length; c++) {
-                const char = line[c];
-                if (char === '"') {
-                  insideQuote = !insideQuote;
-                } else if (char === ',' && !insideQuote) {
-                  row.push(currentCell.trim());
-                  currentCell = '';
-                } else {
-                  currentCell += char;
-                }
-              }
-              row.push(currentCell.trim());
-              return row;
-            });
-
-            if (rows.length > 0) {
-              const parsed = processSheetMatrix(rows);
-              parsedUsers = parsed.users;
-              parsedAllItems = parsed.allDeals;
-              loadedSuccessfully = true;
-            }
-          }
-        } catch (err) {
-          console.warn('CSV export fetch failed, using built-in synchronized snapshot:', err);
-        }
-      }
-
-      // 3. Fallback snapshot
-      if (!loadedSuccessfully) {
-        parsedUsers = [...FALLBACK_USERS];
-        parsedAllItems = [...FALLBACK_ALL_ITEMS];
-      }
-
-      // Re-populate Quick tags and Modal
-      renderQuickTags();
-      renderModalTable();
-
-      if (refreshIcon) refreshIcon.classList.remove('animate-spin');
-
-      // Re-search current name if already searched
-      if (currentSearchedName) {
-        executeSearch(currentSearchedName);
+      if (systemAlertBox) {
+        systemAlertBox.classList.add('hidden');
       }
     }
 
-    // Quick Tags Rendering
-    function renderQuickTags() {
-      const validUsers = parsedUsers
+    if (btnCloseAlert) {
+      btnCloseAlert.addEventListener('click', hideAlert);
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      if (!toastNotification || !toastMessage) return;
+      toastMessage.textContent = msg;
+      toastNotification.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-12');
+      toastNotification.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastNotification.classList.remove('opacity-100', 'translate-y-0');
+        toastNotification.classList.add('opacity-0', 'pointer-events-none', 'translate-y-12');
+      }, 2600);
+    }
+
+    let isChipsCollapsed = false;
+    if (btnToggleChips) {
+      btnToggleChips.addEventListener('click', () => {
+        isChipsCollapsed = !isChipsCollapsed;
+        if (isChipsCollapsed) {
+          quickChipsContainer.classList.add('max-h-16', 'overflow-hidden');
+          quickChipsContainer.classList.remove('max-h-[300px]', 'overflow-y-auto');
+          btnToggleChips.textContent = '전체 펼치기 ▼';
+        } else {
+          quickChipsContainer.classList.remove('max-h-16', 'overflow-hidden');
+          quickChipsContainer.classList.add('max-h-[300px]', 'overflow-y-auto');
+          btnToggleChips.textContent = '접기 ▲';
+        }
+      });
+    }
+
+    function renderQuickChips(users) {
+      const validUsers = users
         .filter(u => !isVacantOrInvalid(u.name))
-        .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        .sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'));
 
       quickTotalCount.textContent = validUsers.length;
+      headerUserCountBadge.textContent = validUsers.length;
+      modalMemberCount.textContent = validUsers.length;
 
-      quickTagsContainer.innerHTML = validUsers.map(user => {
-        const hasBalance = user.balance > 0;
-        const balBadge = hasBalance 
-          ? `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>` 
-          : `<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>`;
+      if (validUsers.length === 0) {
+        quickChipsContainer.innerHTML = '<span class="text-xs text-slate-400">등록된 유효 혈원이 없습니다.</span>';
+        return;
+      }
 
-        const badgeClass = hasBalance
-          ? 'bg-amber-50/80 hover:bg-amber-100 text-amber-900 border-amber-300 font-bold'
-          : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 font-semibold';
-
+      quickChipsContainer.innerHTML = validUsers.map(u => {
+        const hasBal = u.balance > 0;
         return `
-          <button 
-            type="button" 
-            class="quick-tag-btn px-2.5 py-1 rounded-lg text-xs border transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${badgeClass}"
-            data-name="${escapeHtml(user.name)}"
+          <button
+            type="button"
+            class="quick-member-chip inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all border active:scale-95 ${
+              hasBal
+                ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 shadow-sm'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            }"
+            data-name="${escapeHtml(u.name)}"
           >
-            ${balBadge}
-            <span>${escapeHtml(user.name)}</span>
+            <span class="w-1.5 h-1.5 rounded-full ${hasBal ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}"></span>
+            <span>${escapeHtml(u.name)}</span>
+            ${hasBal ? `<span class="text-[10px] font-mono text-amber-700 font-extrabold ml-0.5">${formatNumberWithCommas(u.balance)}</span>` : ''}
           </button>
         `;
       }).join('');
 
-      quickTagsContainer.querySelectorAll('.quick-tag-btn').forEach(btn => {
+      quickChipsContainer.querySelectorAll('.quick-member-chip').forEach(btn => {
         btn.addEventListener('click', () => {
           const name = btn.getAttribute('data-name');
           nicknameInput.value = name;
           btnClearInput.classList.remove('hidden');
-          executeSearch(name);
+          autocompleteBox.classList.add('hidden');
+          executeSearch(name, true);
         });
       });
     }
 
-    // Modal Table Rendering
-    function renderModalTable(filterQuery = '') {
-      const q = normalizeName(filterQuery).toLowerCase();
-      const validUsers = parsedUsers
-        .filter(u => !isVacantOrInvalid(u.name))
-        .filter(u => !q || normalizeName(u.name).toLowerCase().includes(q))
-        .sort((a, b) => (b.balance - a.balance) || a.name.localeCompare(b.name, 'ko'));
-
-      modalRowCount.textContent = validUsers.length;
-
-      if (validUsers.length === 0) {
-        modalListContainer.innerHTML = `
-          <div class="py-12 text-center text-xs text-slate-400">
-            일치하는 혈원이 없습니다.
-          </div>
+    function renderModalTable(users) {
+      modalTableBody.innerHTML = '';
+      if (!users || users.length === 0) {
+        modalTableBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-8 text-center text-slate-400 font-medium">검색 결과가 없습니다.</td>
+          </tr>
         `;
         return;
       }
 
-      modalListContainer.innerHTML = validUsers.map((u, idx) => {
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-indigo-50/60 cursor-pointer transition-colors';
         const hasBal = u.balance > 0;
-        return `
-          <div 
-            class="modal-member-row p-3 sm:px-4 sm:py-3 hover:bg-indigo-50/60 cursor-pointer flex items-center justify-between text-xs sm:text-sm transition-colors"
-            data-name="${escapeHtml(u.name)}"
-          >
-            <div class="flex items-center gap-3">
-              <span class="w-6 text-slate-400 font-mono font-bold text-xs text-right">${u.no || (idx + 1)}</span>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg ${hasBal ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500'} flex items-center justify-center font-bold text-xs">
-                  ${escapeHtml(u.name.slice(0, 1))}
-                </div>
-                <span class="font-extrabold text-slate-900">${escapeHtml(u.name)}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="font-mono-num font-black ${hasBal ? 'text-amber-600' : 'text-slate-400'}">
-                ${formatNumberWithCommas(u.balance)} <span class="text-xs font-semibold text-slate-500">아데나</span>
-              </span>
-              <span class="text-[11px] font-bold px-1.5 py-0.5 rounded ${hasBal ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500'}">
-                ${hasBal ? '수령대기' : '잔고0'}
-              </span>
-            </div>
-          </div>
-        `;
-      }).join('');
 
-      modalListContainer.querySelectorAll('.modal-member-row').forEach(row => {
-        row.addEventListener('click', () => {
-          const name = row.getAttribute('data-name');
-          fullMembersModal.classList.add('hidden');
-          nicknameInput.value = name;
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 text-center text-slate-400 font-mono text-xs">${escapeHtml(u.no || '-')}</td>
+          <td class="py-2.5 px-4 font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full ${hasBal ? 'bg-amber-500' : 'bg-slate-300'}"></span>
+            ${escapeHtml(u.name)}
+          </td>
+          <td class="py-2.5 px-4 text-right font-mono font-bold ${hasBal ? 'text-amber-600' : 'text-slate-400'}">
+            ${formatNumberWithCommas(u.balance)} 아데나
+          </td>
+          <td class="py-2.5 px-4 text-center">
+            <span class="inline-block text-[11px] px-2 py-0.5 rounded-full font-bold ${
+              hasBal ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'
+            }">
+              ${hasBal ? '수령대기' : '정산완료'}
+            </span>
+          </td>
+        `;
+
+        tr.addEventListener('click', () => {
+          membersModal.classList.add('hidden');
+          nicknameInput.value = u.name;
           btnClearInput.classList.remove('hidden');
-          executeSearch(name);
+          executeSearch(u.name, true);
         });
+
+        modalTableBody.appendChild(tr);
       });
     }
 
-    // Search Execution
-    function executeSearch(query) {
-      const trimmed = (query || '').trim();
-      const q = normalizeName(trimmed).toLowerCase();
+    // Modal Search Filter
+    modalFilterInput.addEventListener('input', (e) => {
+      const q = normalizeName(e.target.value).toLowerCase();
+      const validUsers = parsedUsers.filter(u => !isVacantOrInvalid(u.name));
       if (!q) {
-        showAlert('warning', '검색어 필요', '조회할 혈원 닉네임을 입력해 주세요.');
-        showEmptyState();
+        renderModalTable(validUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR')));
         return;
       }
+      const filtered = validUsers.filter(u => {
+        const uNorm = normalizeName(u.name).toLowerCase();
+        return checkNameMatch(q, uNorm);
+      });
+      renderModalTable(filtered);
+    });
 
-      if (isVacantOrInvalid(trimmed)) {
-        showEmptyState();
-        showAlert('warning', '조회 불가', `'${escapeHtml(trimmed)}'은(는) 공석(미배정)이므로 조회할 수 없습니다.`);
-        return;
+    async function loadSheetData() {
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+      try {
+        const gvizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
+        const resp = await fetch(gvizUrl);
+        const text = await resp.text();
+
+        // Extract JSON string from GViz response: google.visualization.Query.setResponse({...});
+        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+        if (jsonMatch && jsonMatch[1]) {
+          const parsed = JSON.parse(jsonMatch[1]);
+          if (parsed && parsed.table && parsed.table.rows) {
+            parseGvizTable(parsed.table);
+            showToast('구글 시트 최신 데이터를 성공적으로 동기화했습니다.');
+            return;
+          }
+        }
+        throw new Error('GViz structure empty');
+      } catch (err) {
+        console.warn('Live Google Sheet fetch failed, falling back to cached preset:', err);
+        parsedUsers = FALLBACK_USERS;
+        parsedAllItems = FALLBACK_ALL_ITEMS;
+        renderQuickChips(parsedUsers);
+        showAlert('info', '캐시 데이터 연동', '구글 시트 실시간 연결을 시도하는 중 캐시된 최신 정산 데이터를 표시하고 있습니다.');
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+        renderIcons();
       }
+    }
 
-      hideAlert();
-      autocompleteBox.classList.add('hidden');
+    function parseGvizTable(table) {
+      const rows = table.rows || [];
+      const newUsers = [];
+      const newItems = [];
 
-      // 1. Find user in left area (A~D)
-      let userRecord = parsedUsers.find(u => normalizeName(u.name).toLowerCase() === q);
-      if (!userRecord) {
-        userRecord = parsedUsers.find(u => {
-          const uNorm = normalizeName(u.name).toLowerCase();
-          return uNorm.includes(q) || q.includes(uNorm);
-        });
-      }
+      rows.forEach(r => {
+        const c = r.c || [];
+        const getVal = (idx) => (c[idx] && c[idx].v !== null && c[idx].v !== undefined) ? c[idx].v.toString().trim() : '';
+        const getNum = (idx) => {
+          if (!c[idx]) return 0;
+          if (typeof c[idx].v === 'number') return c[idx].v;
+          return parseNumericAmount(c[idx].v);
+        };
 
-      const activeName = userRecord ? userRecord.name : trimmed;
-      const targetNorm = normalizeName(activeName).toLowerCase();
+        // 1. Left Members area: col 0 = No, col 2 = Name (C열), col 3 = Balance (D열)
+        const noVal = getVal(0);
+        const nameVal = getVal(2);
+        const balVal = getNum(3);
 
-      // Helper function to check if deal participant matches query
-      function isParticipantMatch(pName, searchNorm) {
-        const pNorm = normalizeName(pName).toLowerCase();
-        if (pNorm === searchNorm) return true;
-        if (pNorm.includes(searchNorm) || searchNorm.includes(pNorm)) return true;
-        if (targetIsAlias(searchNorm, pNorm)) return true;
-        return false;
-      }
+        if (nameVal && !isVacantOrInvalid(nameVal)) {
+          newUsers.push({
+            no: noVal,
+            name: nameVal,
+            balance: balVal
+          });
+        }
 
-      // 2. Match all deals (both completed & pending) where user participated
-      let matchedDeals = parsedAllItems.filter(item => {
-        return item.participants && item.participants.some(p => isParticipantMatch(p, targetNorm));
+        // 2. Right Deals area: col 4=Boss, 5=Date, 6=Time, 7=Item, 9=Price, 11=Fee, 12=DistPrice, 13=Completed
+        const boss = getVal(4);
+        const date = getVal(5);
+        const time = getVal(6);
+        const item = getVal(7);
+        const price = getNum(9);
+        const fee = getNum(11);
+        const distPrice = getNum(12);
+
+        const checkVal = getVal(13).toLowerCase();
+        const isCompleted = checkVal === 'true' || checkVal === '1' || checkVal === 'v' || checkVal === '✓' || checkVal === '✔';
+
+        // Extract participants from col 15 onwards (참여자1 ~ )
+        const participants = [];
+        for (let idx = 15; idx < c.length; idx++) {
+          const pName = getVal(idx);
+          if (pName && !isVacantOrInvalid(pName)) {
+            participants.push(pName);
+          }
+        }
+
+        if (boss || item || participants.length > 0) {
+          newItems.push({
+            boss: boss || '보스',
+            date: date || '-',
+            time: time || '-',
+            item: item || '-',
+            price: price,
+            fee: fee,
+            distPrice: distPrice,
+            isCompleted: isCompleted,
+            participants: participants
+          });
+        }
       });
 
-      // Backup fallback check if live sheet missed rows
-      if (matchedDeals.length === 0) {
-        const fallbackMatches = FALLBACK_ALL_ITEMS.filter(item => {
-          return item.participants && item.participants.some(p => isParticipantMatch(p, targetNorm));
-        });
-        if (fallbackMatches.length > 0) {
-          matchedDeals = fallbackMatches;
-        }
-      }
-
-      if (!userRecord && matchedDeals.length === 0) {
-        showEmptyState();
-        showAlert(
-          'warning',
-          '혈원 정보 없음',
-          `시트에서 '<b>${escapeHtml(trimmed)}</b>' 닉네임과 일치하는 혈원 또는 분배 참여 내역이 없습니다.<br/>
-          (상단 [전체 혈원 잔고] 버튼을 눌러 등록된 명단을 확인해 보세요.)`
-        );
-        return;
-      }
-
-      const activeBalance = userRecord ? userRecord.balance : 0;
-      currentSearchedName = activeName;
-      currentMatchedDeals = matchedDeals;
-
-      renderFilteredResult(activeName, activeBalance, matchedDeals, userRecord);
-    }
-
-    function renderFilteredResult(name, balance, deals, userRecord) {
-      emptyState.classList.add('hidden');
-      resultSection.classList.remove('hidden');
-
-      targetNicknameDisplay.textContent = name;
-      avatarBadge.textContent = name.slice(0, 2).toUpperCase();
-      
-      const userIdx = parsedUsers.findIndex(u => normalizeName(u.name) === normalizeName(name));
-      const userNo = userRecord && userRecord.no ? userRecord.no : (userIdx >= 0 ? userIdx + 1 : '-');
-      roleBadge.textContent = `혈원 번호: ${userNo}`;
-
-      // 1. 보유 잔고 렌더링
-      userBalanceDisplay.textContent = formatNumberWithCommas(balance);
-      if (balance > 0) {
-        balanceStatusText.textContent = '수령 대기중 (지급예정)';
-        balanceStatusText.className = 'text-xs sm:text-sm font-extrabold text-amber-200 mt-0.5 inline-block';
+      if (newUsers.length > 0) {
+        parsedUsers = newUsers;
       } else {
-        balanceStatusText.textContent = '잔고 없음 (0 아데나)';
-        balanceStatusText.className = 'text-xs sm:text-sm font-medium text-slate-300 mt-0.5 inline-block';
+        parsedUsers = FALLBACK_USERS;
       }
 
-      // Badges count
-      const completedList = deals.filter(d => d.isCompleted);
-      const pendingList = deals.filter(d => !d.isCompleted);
+      if (newItems.length > 0) {
+        parsedAllItems = newItems;
+      } else {
+        parsedAllItems = FALLBACK_ALL_ITEMS;
+      }
 
-      countAllBadge.textContent = deals.length;
-      countCompletedBadge.textContent = completedList.length;
-      countPendingBadge.textContent = pendingList.length;
-
-      // Render cards with current tab
-      renderDealsCards();
-
-      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      renderQuickChips(parsedUsers);
     }
 
-    function renderDealsCards() {
-      let filtered = currentMatchedDeals;
-      if (currentFilterTab === 'completed') {
-        filtered = currentMatchedDeals.filter(d => d.isCompleted);
-      } else if (currentFilterTab === 'pending') {
-        filtered = currentMatchedDeals.filter(d => !d.isCompleted);
-      }
-
-      if (filtered.length === 0) {
-        const hasBalance = currentSearchedName && parsedUsers.some(u => normalizeName(u.name) === normalizeName(currentSearchedName) && u.balance > 0);
-        
-        dealsListContainer.innerHTML = `
-          <div class="py-10 px-4 text-center bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-amber-100/70 text-amber-600 flex items-center justify-center shadow-xs">
-              <i data-lucide="info" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-800">
-                ${hasBalance ? '현재 시트 우측 상세 목록에 별도 참여 기록이 없거나 이전 정산에서 이관된 잔고입니다.' : '해당 탭에 표시할 내역이 없습니다.'}
-              </p>
-              <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
-                ${hasBalance ? `좌측 시트의 [보유잔고: <b>${formatNumberWithCommas(parsedUsers.find(u => normalizeName(u.name) === normalizeName(currentSearchedName)).balance)} 아데나</b>]는 정상 등록되어 있으니 정산 일정에 맞춰 수령하시면 됩니다.` : '상단 탭을 [전체보기]로 전환하거나 다른 닉네임을 조회해 보세요.'}
-              </p>
-            </div>
-          </div>
-        `;
-        renderIcons();
-        return;
-      }
-
-      const activeNorm = normalizeName(currentSearchedName).toLowerCase();
-
-      dealsListContainer.innerHTML = filtered.map(deal => {
-        const isComp = deal.isCompleted;
-
-        // Status Badge
-        const statusBadge = isComp
-          ? `<span class="inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300/80 shadow-2xs">
-               <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> 거래완료
-             </span>`
-          : `<span class="inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-               <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600 animate-spin" style="animation-duration: 8s;"></i> 미거래 (정산예정)
-             </span>`;
-
-        const cardBorderClass = isComp
-          ? 'border-emerald-200/90 bg-white hover:border-emerald-300'
-          : 'border-slate-200 bg-slate-50/50 hover:border-slate-300';
-
-        // Render Participant Chips with Active User Highlight
-        const participantChips = deal.participants.map(pName => {
-          const pNorm = normalizeName(pName).toLowerCase();
-          const isTarget = pNorm === activeNorm || (activeNorm && pNorm.includes(activeNorm)) || (activeNorm && activeNorm.includes(pNorm)) || (targetIsAlias(activeNorm, pNorm));
-          if (isTarget) {
-            return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-extrabold text-xs shadow-sm ring-2 ring-indigo-300">
-              <i data-lucide="star" class="w-3 h-3 text-amber-300 fill-amber-300"></i>
-              ${escapeHtml(pName)} (본인)
-            </span>`;
-          }
-          return `<span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-xs border border-slate-200">
-            ${escapeHtml(pName)}
-          </span>`;
-        }).join('');
-
-        return `
-          <div class="rounded-2xl border ${cardBorderClass} p-4 sm:p-5 shadow-xs transition-all flex flex-col gap-4">
-            <!-- Header: Boss & Status -->
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div class="flex items-center gap-2.5">
-                ${statusBadge}
-                <span class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-1.5">
-                  <i data-lucide="swords" class="w-4 h-4 text-indigo-600"></i>
-                  ${escapeHtml(deal.boss)}
-                </span>
-                <span class="text-xs text-slate-500 font-mono">(${escapeHtml(deal.date)} ${escapeHtml(deal.time)})</span>
-              </div>
-              <div class="text-xs font-semibold text-slate-500">
-                참여 인원: <b class="text-slate-800 font-mono font-bold">${deal.participants.length}명</b>
-              </div>
-            </div>
-
-            <!-- Sequence: 보스, 날짜, 시간, 아이템, 가격, 혈비귀속, 분배할가격 -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-xs">
-              <!-- 1. 보스 -->
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                <span class="text-[11px] font-bold text-slate-400 block mb-0.5">보스</span>
-                <span class="text-xs font-extrabold text-slate-800 truncate block">${escapeHtml(deal.boss)}</span>
-              </div>
-              <!-- 2. 날짜 -->
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                <span class="text-[11px] font-bold text-slate-400 block mb-0.5">날짜</span>
-                <span class="text-xs font-bold text-slate-700 block font-mono">${escapeHtml(deal.date)}</span>
-              </div>
-              <!-- 3. 시간 -->
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                <span class="text-[11px] font-bold text-slate-400 block mb-0.5">시간</span>
-                <span class="text-xs font-bold text-slate-700 block font-mono">${escapeHtml(deal.time)}</span>
-              </div>
-              <!-- 4. 아이템 -->
-              <div class="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100 col-span-2 sm:col-span-1">
-                <span class="text-[11px] font-bold text-indigo-600 block mb-0.5">아이템</span>
-                <span class="text-xs font-extrabold text-indigo-950 truncate block" title="${escapeHtml(deal.item)}">${escapeHtml(deal.item)}</span>
-              </div>
-              <!-- 5. 가격 -->
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                <span class="text-[11px] font-bold text-slate-400 block mb-0.5">가격</span>
-                <span class="text-xs font-mono font-bold text-slate-800 block">${deal.price || '0'}</span>
-              </div>
-              <!-- 6. 혈비귀속 -->
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                <span class="text-[11px] font-bold text-slate-400 block mb-0.5">혈비귀속 (20%)</span>
-                <span class="text-xs font-mono font-bold text-slate-700 block">${deal.guildFee || '0'}</span>
-              </div>
-              <!-- 7. 분배할가격 -->
-              <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-200 ring-1 ring-amber-300/40 col-span-2 sm:col-span-1">
-                <span class="text-[11px] font-bold text-amber-800 block mb-0.5">분배할가격 (70%)</span>
-                <span class="text-xs font-mono-num font-black text-amber-950 block">${deal.distAmountFormatted}</span>
-              </div>
-            </div>
-
-            <!-- Participants List with current user highlighted -->
-            <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200 flex flex-col gap-2">
-              <span class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-                <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span>전체 참여자 명단 (${deal.participants.length}명) :</span>
-              </span>
-              <div class="flex items-center gap-1.5 flex-wrap">
-                ${participantChips}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      renderIcons();
-    }
-
-    // Autocomplete Handler
     function handleAutocomplete(text) {
       const q = normalizeName(text).toLowerCase();
       if (!q) {
@@ -1468,7 +1015,7 @@
       const validUsers = parsedUsers.filter(u => !isVacantOrInvalid(u.name));
       const matches = validUsers.filter(u => {
         const uNorm = normalizeName(u.name).toLowerCase();
-        return uNorm.includes(q);
+        return checkNameMatch(q, uNorm);
       }).slice(0, 8);
 
       if (matches.length === 0) {
@@ -1508,123 +1055,349 @@
           nicknameInput.value = name;
           btnClearInput.classList.remove('hidden');
           autocompleteBox.classList.add('hidden');
-          executeSearch(name);
+          executeSearch(name, true);
         });
       });
     }
 
-    // Input Events
+    // Live search debounce
+    let searchDebounceTimer = null;
     nicknameInput.addEventListener('input', (e) => {
       const val = e.target.value;
       if (val.trim()) {
         btnClearInput.classList.remove('hidden');
       } else {
         btnClearInput.classList.add('hidden');
+        autocompleteBox.classList.add('hidden');
+        showEmptyState();
+        return;
       }
+
       handleAutocomplete(val);
+
+      // Instant live search with 140ms debounce
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        const clean = normalizeName(val);
+        if (clean.length >= 1) {
+          executeSearch(val, false);
+        }
+      }, 140);
     });
 
     nicknameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         autocompleteBox.classList.add('hidden');
-        executeSearch(nicknameInput.value);
+        executeSearch(nicknameInput.value, true);
       }
     });
 
     btnSearch.addEventListener('click', () => {
-      executeSearch(nicknameInput.value);
+      executeSearch(nicknameInput.value, true);
     });
 
     btnClearInput.addEventListener('click', () => {
       nicknameInput.value = '';
       btnClearInput.classList.add('hidden');
       autocompleteBox.classList.add('hidden');
+      showEmptyState();
       nicknameInput.focus();
     });
 
+    // Close autocomplete when clicking outside
     document.addEventListener('click', (e) => {
       if (!nicknameInput.contains(e.target) && !autocompleteBox.contains(e.target)) {
         autocompleteBox.classList.add('hidden');
       }
     });
 
-    // Tab Buttons
-    function setDealTab(tab) {
-      currentFilterTab = tab;
-      [tabAll, tabCompleted, tabPending].forEach(btn => {
-        btn.classList.remove('bg-white', 'text-indigo-700', 'shadow-2xs');
-        btn.classList.add('text-slate-600');
-      });
-
-      if (tab === 'all') {
-        tabAll.classList.add('bg-white', 'text-indigo-700', 'shadow-2xs');
-      } else if (tab === 'completed') {
-        tabCompleted.classList.add('bg-white', 'text-indigo-700', 'shadow-2xs');
-      } else {
-        tabPending.classList.add('bg-white', 'text-indigo-700', 'shadow-2xs');
+    function executeSearch(query, shouldCloseAutocomplete = true) {
+      const trimmed = (query || '').trim();
+      const q = normalizeName(trimmed).toLowerCase();
+      if (!q) {
+        showEmptyState();
+        return;
       }
 
-      renderDealsCards();
+      if (isVacantOrInvalid(trimmed)) {
+        showEmptyState();
+        showAlert('warning', '조회 불가', `'${escapeHtml(trimmed)}'은(는) 공석(미배정)이므로 조회할 수 없습니다.`);
+        return;
+      }
+
+      hideAlert();
+      if (shouldCloseAutocomplete) {
+        autocompleteBox.classList.add('hidden');
+      }
+
+      // 1. Identify user: exact match > prefix match > substring match
+      const validUsers = parsedUsers.filter(u => !isVacantOrInvalid(u.name));
+      let userRecord = validUsers.find(u => normalizeName(u.name).toLowerCase() === q);
+
+      if (!userRecord) {
+        userRecord = validUsers.find(u => {
+          const uStripped = normalizeName(u.name).replace(/^폭군/, '').toLowerCase();
+          const qStripped = q.replace(/^폭군/, '');
+          return uStripped && qStripped && (uStripped === qStripped || uStripped.startsWith(qStripped));
+        });
+      }
+
+      if (!userRecord) {
+        userRecord = validUsers.find(u => checkNameMatch(q, normalizeName(u.name).toLowerCase()));
+      }
+
+      const activeName = userRecord ? userRecord.name : trimmed;
+      const targetNorm = normalizeName(activeName).toLowerCase();
+
+      // 2. Find participating deals
+      let matchedDeals = parsedAllItems.filter(item => {
+        return item.participants && item.participants.some(p => {
+          const pNorm = normalizeName(p).toLowerCase();
+          return checkNameMatch(targetNorm, pNorm) || checkNameMatch(q, pNorm);
+        });
+      });
+
+      // Backup check against fallback items
+      if (matchedDeals.length === 0) {
+        const fallbackMatches = FALLBACK_ALL_ITEMS.filter(item => {
+          return item.participants && item.participants.some(p => {
+            const pNorm = normalizeName(p).toLowerCase();
+            return checkNameMatch(targetNorm, pNorm) || checkNameMatch(q, pNorm);
+          });
+        });
+        if (fallbackMatches.length > 0) {
+          matchedDeals = fallbackMatches;
+        }
+      }
+
+      if (!userRecord && matchedDeals.length === 0) {
+        showEmptyState();
+        showAlert(
+          'warning',
+          '혈원 정보 없음',
+          `시트에서 '<b>${escapeHtml(trimmed)}</b>' 글자를 포함하는 혈원 또는 분배 내역을 찾을 수 없습니다.<br/>
+          (우측 상단 <b>[전체 혈원 잔고]</b> 버튼을 눌러 등록된 명단을 확인해 보세요.)`
+        );
+        return;
+      }
+
+      const activeBalance = userRecord ? userRecord.balance : 0;
+      currentSearchedName = activeName;
+      currentMatchedDeals = matchedDeals;
+
+      renderFilteredResult(activeName, activeBalance, matchedDeals, userRecord);
     }
 
-    tabAll.addEventListener('click', () => setDealTab('all'));
-    tabCompleted.addEventListener('click', () => setDealTab('completed'));
-    tabPending.addEventListener('click', () => setDealTab('pending'));
+    function renderFilteredResult(name, balance, deals, userRecord) {
+      emptySearchState.classList.add('hidden');
+      resultContainer.classList.remove('hidden');
 
-    // Modal Events
-    btnOpenModal.addEventListener('click', () => {
-      modalSearchInput.value = '';
-      renderModalTable();
-      fullMembersModal.classList.remove('hidden');
-      modalSearchInput.focus();
-    });
+      // Member name & Badge
+      resultMemberName.textContent = name;
+      memberNoBadge.textContent = userRecord ? `혈원 번호: ${userRecord.no}번` : '혈원';
 
-    btnCloseModal.addEventListener('click', () => fullMembersModal.classList.add('hidden'));
-    btnCloseModalBottom.addEventListener('click', () => fullMembersModal.classList.add('hidden'));
-    fullMembersModal.addEventListener('click', (e) => {
-      if (e.target === fullMembersModal) fullMembersModal.classList.add('hidden');
-    });
+      // Balance & Status
+      resultBalanceText.textContent = formatNumberWithCommas(balance);
+      if (balance > 0) {
+        resultStatusText.innerHTML = `<span class="text-amber-200 font-black">수령 대기중 (지급 대상)</span>`;
+      } else {
+        resultStatusText.innerHTML = `<span class="text-slate-300">정산 완료 (잔고 0원)</span>`;
+      }
 
-    modalSearchInput.addEventListener('input', (e) => {
-      renderModalTable(e.target.value);
-    });
+      // Update Tab Counts
+      const completedList = deals.filter(d => d.isCompleted);
+      const pendingList = deals.filter(d => !d.isCompleted);
 
-    btnRefresh.addEventListener('click', () => {
+      countAll.textContent = deals.length;
+      countCompleted.textContent = completedList.length;
+      countPending.textContent = pendingList.length;
+
+      // Render Deals based on current filter mode
+      renderDealsList(deals, name);
+    }
+
+    function renderDealsList(deals, currentName) {
+      dealsContainer.innerHTML = '';
+
+      let filtered = deals;
+      if (currentFilterMode === 'completed') {
+        filtered = deals.filter(d => d.isCompleted);
+      } else if (currentFilterMode === 'pending') {
+        filtered = deals.filter(d => !d.isCompleted);
+      }
+
+      if (filtered.length === 0) {
+        emptyDealsNotice.classList.remove('hidden');
+        return;
+      }
+      emptyDealsNotice.classList.add('hidden');
+
+      const targetNorm = normalizeName(currentName).toLowerCase();
+
+      filtered.forEach(deal => {
+        const isDone = deal.isCompleted;
+        const card = document.createElement('div');
+        card.className = `rounded-xl border p-4 sm:p-5 transition-all flex flex-col gap-3.5 ${
+          isDone 
+            ? 'bg-amber-50/40 border-amber-200/80 shadow-sm' 
+            : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
+        }`;
+
+        // Top Status & Boss info
+        const topBar = `
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-md text-xs font-black flex items-center gap-1 ${
+                isDone 
+                  ? 'bg-emerald-600 text-white' 
+                  : 'bg-slate-200 text-slate-700'
+              }">
+                <i data-lucide="${isDone ? 'check-circle-2' : 'clock'}" class="w-3.5 h-3.5"></i>
+                ${isDone ? '거래완료 (정산반영)' : '미거래 (앞으로 받을 분배금)'}
+              </span>
+              <span class="font-extrabold text-sm text-slate-900">${escapeHtml(deal.boss)}</span>
+            </div>
+            <div class="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span>${escapeHtml(deal.date)} ${escapeHtml(deal.time)}</span>
+            </div>
+          </div>
+        `;
+
+        // 7 Ordered Columns Grid
+        const gridBody = `
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-xs bg-slate-50/70 p-3 rounded-xl border border-slate-200/60">
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block">1. 보스</span>
+              <span class="font-bold text-slate-800 text-xs sm:text-sm mt-0.5 block truncate">${escapeHtml(deal.boss)}</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block">2. 날짜</span>
+              <span class="font-bold text-slate-800 text-xs sm:text-sm mt-0.5 block">${escapeHtml(deal.date)}</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block">3. 시간</span>
+              <span class="font-bold text-slate-800 text-xs sm:text-sm mt-0.5 block">${escapeHtml(deal.time)}</span>
+            </div>
+            <div class="col-span-2 sm:col-span-1">
+              <span class="text-[11px] font-bold text-indigo-500 block">4. 아이템</span>
+              <span class="font-black text-indigo-950 text-xs sm:text-sm mt-0.5 block truncate">${escapeHtml(deal.item)}</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block">5. 가격</span>
+              <span class="font-mono font-bold text-slate-700 text-xs sm:text-sm mt-0.5 block">${formatNumberWithCommas(deal.price)}</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block">6. 혈비귀속(20%)</span>
+              <span class="font-mono font-bold text-slate-700 text-xs sm:text-sm mt-0.5 block">${formatNumberWithCommas(deal.fee)}</span>
+            </div>
+            <div class="col-span-2 sm:col-span-1 bg-amber-100/60 -m-1.5 p-1.5 rounded-lg border border-amber-200/80">
+              <span class="text-[11px] font-black text-amber-800 block">7. 분배할가격(70%)</span>
+              <span class="font-mono font-black text-amber-900 text-xs sm:text-sm mt-0.5 block">${formatNumberWithCommas(deal.distPrice)}</span>
+            </div>
+          </div>
+        `;
+
+        // Participant Badges with Highlight on current member
+        const participantsChips = deal.participants.map(p => {
+          const pNorm = normalizeName(p).toLowerCase();
+          const isSelf = checkNameMatch(targetNorm, pNorm);
+
+          if (isSelf) {
+            return `
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-600 text-white font-extrabold text-xs shadow-sm ring-2 ring-indigo-300">
+                <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                ${escapeHtml(p)} (본인)
+              </span>
+            `;
+          }
+          return `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200">
+              ${escapeHtml(p)}
+            </span>
+          `;
+        }).join('');
+
+        const participantsBar = `
+          <div class="pt-2 border-t border-slate-100 flex flex-col gap-1.5">
+            <span class="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i>
+              참여자 (${deal.participants.length}명)
+            </span>
+            <div class="flex flex-wrap items-center gap-1.5">
+              ${participantsChips}
+            </div>
+          </div>
+        `;
+
+        card.innerHTML = topBar + gridBody + participantsBar;
+        dealsContainer.appendChild(card);
+      });
+
+      renderIcons();
+    }
+
+    function showEmptyState() {
+      emptySearchState.classList.remove('hidden');
+      resultContainer.classList.add('hidden');
+      currentSearchedName = '';
+      currentMatchedDeals = [];
+    }
+
+    function updateTabStyles() {
+      const activeClass = 'bg-white text-indigo-700 shadow-sm';
+      const inactiveClass = 'hover:text-slate-900';
+
+      tabFilterAll.className = `px-3 py-1.5 rounded-lg transition-all ${currentFilterMode === 'all' ? activeClass : inactiveClass}`;
+      tabFilterCompleted.className = `px-3 py-1.5 rounded-lg transition-all ${currentFilterMode === 'completed' ? activeClass : inactiveClass}`;
+      tabFilterPending.className = `px-3 py-1.5 rounded-lg transition-all ${currentFilterMode === 'pending' ? activeClass : inactiveClass}`;
+
+      if (currentSearchedName) {
+        renderDealsList(currentMatchedDeals, currentSearchedName);
+      }
+    }
+
+    tabFilterAll.addEventListener('click', () => { currentFilterMode = 'all'; updateTabStyles(); });
+    tabFilterCompleted.addEventListener('click', () => { currentFilterMode = 'completed'; updateTabStyles(); });
+    tabFilterPending.addEventListener('click', () => { currentFilterMode = 'pending'; updateTabStyles(); });
+
+    // Refresh button event
+    btnRefreshSheet.addEventListener('click', () => {
       loadSheetData();
     });
 
-    // Copy Result to Clipboard
+    // Copy to Clipboard Event
     btnCopyResult.addEventListener('click', () => {
       if (!currentSearchedName) return;
 
-      const user = parsedUsers.find(u => normalizeName(u.name) === normalizeName(currentSearchedName));
-      const balStr = user ? formatNumberWithCommas(user.balance) : '0';
-
+      const userRecord = parsedUsers.find(u => normalizeName(u.name) === normalizeName(currentSearchedName));
+      const bal = userRecord ? userRecord.balance : 0;
       const completed = currentMatchedDeals.filter(d => d.isCompleted);
       const pending = currentMatchedDeals.filter(d => !d.isCompleted);
 
       let text = `[폭군 분배금 내역 - ${currentSearchedName}]\n`;
-      text += `■ 보유잔고: ${balStr} 아데나\n`;
-      text += `■ 거래완료 건수: ${completed.length}건\n`;
-      text += `■ 미거래 건수: ${pending.length}건\n\n`;
+      text += `■ 현재 보유잔고(수령가능): ${formatNumberWithCommas(bal)} 아데나\n\n`;
 
-      if (completed.length > 0) {
-        text += `[거래완료 상세]\n`;
-        completed.forEach((c, idx) => {
-          text += `${idx + 1}. ${c.boss} (${c.date} ${c.time}) / ${c.item} / 분배금: ${c.distAmountFormatted} 아데나\n`;
-        });
-        text += `\n`;
-      }
-
-      if (pending.length > 0) {
-        text += `[미거래(정산예정) 상세]\n`;
-        pending.forEach((p, idx) => {
-          text += `${idx + 1}. ${p.boss} (${p.date} ${p.time}) / ${p.item}\n`;
+      text += `■ 거래완료 내역 (${completed.length}건):\n`;
+      if (completed.length === 0) {
+        text += `- 거래완료 내역이 없습니다.\n`;
+      } else {
+        completed.forEach((c, i) => {
+          text += `${i + 1}. [${c.boss}] ${c.item} | 날짜: ${c.date} ${c.time} | 분배할가격: ${formatNumberWithCommas(c.distPrice)} 아데나\n`;
         });
       }
 
-      text += `\nMade by 폭군하스 v2.6`;
+      text += `\n■ 미거래(정산예정) 내역 (${pending.length}건):\n`;
+      if (pending.length === 0) {
+        text += `- 대기중인 미거래 내역이 없습니다.\n`;
+      } else {
+        pending.forEach((p, i) => {
+          text += `${i + 1}. [${p.boss}] ${p.item} | 날짜: ${p.date} ${p.time}\n`;
+        });
+      }
+
+      text += `\nMade by 폭군하스 v3.1`;
 
       const dummy = document.createElement('textarea');
       dummy.value = text;
@@ -1633,10 +1406,27 @@
       document.execCommand('copy');
       document.body.removeChild(dummy);
 
-      showToast('내역이 클립보드에 복사되었습니다.');
+      showToast('내역 전체가 클립보드에 복사되었습니다.');
     });
 
-    // Initial Execution on Load
+    // Modal Events
+    btnOpenModal.addEventListener('click', () => {
+      modalFilterInput.value = '';
+      const validUsers = parsedUsers.filter(u => !isVacantOrInvalid(u.name));
+      renderModalTable(validUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR')));
+      membersModal.classList.remove('hidden');
+    });
+
+    btnCloseModal.addEventListener('click', () => membersModal.classList.add('hidden'));
+    btnModalCloseConfirm.addEventListener('click', () => membersModal.classList.add('hidden'));
+
+    membersModal.addEventListener('click', (e) => {
+      if (e.target === membersModal) {
+        membersModal.classList.add('hidden');
+      }
+    });
+
+    // Initial Execution
     window.addEventListener('DOMContentLoaded', () => {
       renderIcons();
       showEmptyState();
